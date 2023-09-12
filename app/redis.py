@@ -12,7 +12,7 @@ from redis.commands.search.field import VectorField
 from redis.commands.search.query import Query
 
 from app.config import RedisDataStoreConfig
-from app.datastore import DataStore
+from app.interfaces import DataStore
 
 logger = logging.getLogger(__name__)
 

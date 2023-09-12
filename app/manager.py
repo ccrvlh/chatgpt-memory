@@ -4,10 +4,9 @@ from typing import Any
 from typing import Dict
 from typing import List
 
+from app.config import Memory
 from app.redis import RedisDataStore
 from app.embeddings import EmbeddingClient
-
-from app.config import Memory
 
 
 class MemoryManager:

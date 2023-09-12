@@ -2,11 +2,13 @@
 import json
 import logging
 import requests
+import time
 
-from typing import Union
-from typing import Tuple
-from typing import Dict
+from random import random
 from typing import Any
+from typing import Dict
+from typing import Tuple
+from typing import Union
 from transformers import GPT2TokenizerFast
 
 from app.config import OPENAI_BACKOFF
@@ -14,7 +16,6 @@ from app.config import OPENAI_MAX_RETRIES
 from app.config import OPENAI_TIMEOUT
 from app.errors import OpenAIError
 from app.errors import OpenAIRateLimitError
-from app.reflection import retry_with_exponential_backoff
 
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,88 @@ def count_openai_tokens(text: str, tokenizer: Any, use_tiktoken: bool) -> int:
         return len(tokenizer.tokenize(text))
 
 
+def get_prompt(message: str, history: str) -> str:
+    """
+    Generates the prompt based on the current history and message.
+
+    Args:
+        message (str): Current message from user.
+        history (str): Retrieved history for the current message.
+        History follows the following format for example:
+        ```
+        Human: hello
+        Assistant: hello, how are you?
+        Human: good, you?
+        Assistant: I am doing good as well. How may I help you?
+        ```
+    Returns:
+        prompt: Curated prompt for the ChatGPT API based on current params.
+    """
+    prompt = f"""Assistant is a large language model trained by OpenAI.
+
+    Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+
+    Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.
+
+    Overall, Assistant is a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.
+
+    {history}
+    Human: {message}
+    Assistant:"""
+
+    return prompt
+
+
+def retry_with_exponential_backoff(
+    backoff_in_seconds: float = 1,
+    max_retries: int = 10,
+    errors: tuple = (OpenAIRateLimitError,),
+):
+    """
+    Decorator to retry a function with exponential backoff.
+    :param backoff_in_seconds: The initial backoff in seconds.
+    :param max_retries: The maximum number of retries.
+    :param errors: The errors to catch retry on.
+    """
+
+    def decorator(function):
+        def wrapper(*args, **kwargs):
+            # Initialize variables
+            num_retries = 0
+
+            # Loop until a successful response or max_retries is hit or an
+            # exception is raised
+            while True:
+                try:
+                    return function(*args, **kwargs)
+
+                # Retry on specified errors
+                except errors as e:
+                    # Check if max retries has been reached
+                    if num_retries > max_retries:
+                        raise Exception(f"Maximum number of retries ({max_retries}) exceeded.")
+
+                    # Increment the delay
+                    sleep_time = backoff_in_seconds * 2**num_retries + random()
+
+                    # Sleep for the delay
+                    logger.warning(
+                        "%s - %s, retry %s in %s seconds...",
+                        e.__class__.__name__,
+                        e,
+                        function.__name__,
+                        "{0:.2f}".format(sleep_time),
+                    )
+                    time.sleep(sleep_time)
+
+                    # Increment retries
+                    num_retries += 1
+
+        return wrapper
+
+    return decorator
+
+
 @retry_with_exponential_backoff(
     backoff_in_seconds=OPENAI_BACKOFF,
     max_retries=OPENAI_MAX_RETRIES,
@@ -128,35 +211,3 @@ def openai_request(
         raise openai_error
 
     return res
-
-
-def get_prompt(message: str, history: str) -> str:
-    """
-    Generates the prompt based on the current history and message.
-
-    Args:
-        message (str): Current message from user.
-        history (str): Retrieved history for the current message.
-        History follows the following format for example:
-        ```
-        Human: hello
-        Assistant: hello, how are you?
-        Human: good, you?
-        Assistant: I am doing good as well. How may I help you?
-        ```
-    Returns:
-        prompt: Curated prompt for the ChatGPT API based on current params.
-    """
-    prompt = f"""Assistant is a large language model trained by OpenAI.
-
-    Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
-
-    Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.
-
-    Overall, Assistant is a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.
-
-    {history}
-    Human: {message}
-    Assistant:"""
-
-    return prompt
