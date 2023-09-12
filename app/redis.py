@@ -2,8 +2,6 @@ import logging
 import redis
 
 from typing import Any
-from typing import Dict
-from typing import List
 from uuid import uuid4
 
 from redis.commands.search.field import TagField
@@ -73,12 +71,12 @@ class RedisDataStore(DataStore):
         except redis.exceptions.ResponseError as redis_error:
             logger.info(f"Working with existing Redis index.\nDetails: {redis_error}")
 
-    def index_documents(self, documents: List[Dict]):
+    def index_documents(self, documents: list[dict]):
         """
         Indexes the set of documents.
 
         Args:
-            documents (List[Dict]): List of documents to be indexed.
+            documents (list[dict]): list of documents to be indexed.
         """
         redis_pipeline = self.redis_connection.pipeline(transaction=False)
         for document in documents:
@@ -93,7 +91,7 @@ class RedisDataStore(DataStore):
         query_vector: bytes,
         conversation_id: str,
         topk: int = 5,
-    ) -> List[Any]:
+    ) -> list[Any]:
         """
         Searches the redis index using the query vector.
 
@@ -104,7 +102,7 @@ class RedisDataStore(DataStore):
                                            returned from the search result documents
 
         Returns:
-            List[Any]: Search result documents.
+            list[Any]: Search result documents.
         """
         query = (
             Query(
@@ -126,21 +124,25 @@ class RedisDataStore(DataStore):
 
         return result_documents
 
-    def get_all_conversation_ids(self) -> List[str]:
+    def get_all_conversation_ids(self) -> list[str]:
         """
         Returns conversation ids of all conversations.
 
         Returns:
-            List[str]: List of conversation ids stored in redis.
+            list[str]: list of conversation ids stored in redis.
         """
         query = Query("*").return_fields("conversation_id")
         result_documents = self.redis_connection.ft().search(query).docs
 
-        conversation_ids: List[str] = []
+        conversation_ids: list[str] = []
         conversation_ids = list(
-            set([getattr(result_document, "conversation_id") for result_document in result_documents])
+            set(
+                [
+                    getattr(result_document, "conversation_id")
+                    for result_document in result_documents
+                ]
+            )
         )
-
         return conversation_ids
 
     def delete_documents(self, conversation_id: str):
@@ -151,14 +153,11 @@ class RedisDataStore(DataStore):
             conversation_id (str): Id of the conversation to be deleted.
         """
         query = (
-            Query(f"""(@conversation_id:{{{conversation_id}}})""")
-            .return_fields(
-                "id",
-            )
-            .dialect(2)
+            Query(f"""(@conversation_id:{{{conversation_id}}})""").return_fields("id").dialect(2)
         )
         for document in self.redis_connection.ft().search(query).docs:
             document_id = getattr(document, "id")
-            deletion_status = self.redis_connection.ft().delete_document(document_id, delete_actual_document=True)
-
+            deletion_status = self.redis_connection.ft().delete_document(
+                document_id, delete_actual_document=True
+            )
             assert deletion_status, f"Deletion of the document with id {document_id} failed!"

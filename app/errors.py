@@ -10,10 +10,7 @@ class ChatGPTMemoryError(Exception):
     attribute.
     """
 
-    def __init__(
-        self,
-        message: Optional[str] = None,
-    ):
+    def __init__(self, message: Optional[str] = None):
         super().__init__()
         if message:
             self.message = message
@@ -29,11 +26,7 @@ class ChatGPTMemoryError(Exception):
 class OpenAIError(ChatGPTMemoryError):
     """Exception for issues that occur in the OpenAI APIs"""
 
-    def __init__(
-        self,
-        message: Optional[str] = None,
-        status_code: Optional[int] = None,
-    ):
+    def __init__(self, message: Optional[str] = None, status_code: Optional[int] = None):
         super().__init__(message=message)
         self.status_code = status_code
 

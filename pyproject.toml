@@ -25,6 +25,8 @@ python-dotenv = "^1.0.0"
 streamlit = "^1.21.0"
 fastapi = "^0.95.1"
 uvicorn = "^0.21.1"
+ipython = "^8.15.0"
+tiktoken = "^0.5.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -32,6 +34,7 @@ mypy = "^1.5.1"
 black = "^23.9.1"
 flake8 = "^6.1.0"
 types-requests = "^2.31.0.2"
+types-tqdm = "^4.66.0.2"
 
 [build-system]
 requires = ["poetry-core"]

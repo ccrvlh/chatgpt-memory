@@ -3,8 +3,7 @@ from app.redis import RedisDataStore
 from app.config import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 from app.embeddings import EmbeddingConfig
 from app.embeddings import EmbeddingClient
-from app.manager import MemoryManager
-from app.config import Memory
+from app.store import MemoryManager
 
 
 class TestMemoryManager:
@@ -26,32 +25,34 @@ class TestMemoryManager:
         memory_manager = MemoryManager(datastore=self.datastore, embed_client=self.embedding_client)
 
         # assert that the memory manager is initially empty
-        assert len(memory_manager.conversations) == 0
+        assert len(memory_manager.conversations_ids) == 0
 
         # add a conversation to the memory manager
-        memory_manager.add_conversation(Memory(conversation_id="1"))
+        memory_manager.add_conversation(conversation_id="1")
 
         # assert that the memory manager has 1 conversation
-        assert len(memory_manager.conversations) == 1
+        assert len(memory_manager.conversations_ids) == 1
 
         # remove the conversation from the memory manager
-        memory_manager.remove_conversation(Memory(conversation_id="1"))
+        memory_manager.remove_conversation(conversation_id="1")
 
         # assert that the memory manager is empty
-        assert len(memory_manager.conversations) == 0
+        assert len(memory_manager.conversations_ids) == 0
 
     def test_adding_messages_to_conversation(self):
         # create a memory manager
         memory_manager = MemoryManager(datastore=self.datastore, embed_client=self.embedding_client)
 
         # add a conversation to the memory manager
-        memory_manager.add_conversation(Memory(conversation_id="1"))
+        memory_manager.add_conversation(conversation_id="1")
 
         # assert that the memory manager has 1 conversation
-        assert len(memory_manager.conversations) == 1
+        assert len(memory_manager.conversations_ids) == 1
 
         # add a message to the conversation
-        memory_manager.add_message(conversation_id="1", human="Hello", assistant="Hello. How are you?")
+        memory_manager.add_message(
+            conversation_id="1", human="Hello", assistant="Hello. How are you?"
+        )
 
         # get messages for that conversation
         messages = memory_manager.get_messages(conversation_id="1", query="Hello")

@@ -25,7 +25,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Cloud data store (Redis, Pinecone etc.)
 REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = int(os.getenv("REDIS_PORT"))
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 
 
@@ -59,7 +59,7 @@ class ChatGPTConfig(BaseModel):
 class EmbeddingConfig(BaseModel):
     api_key: str
     time_out: float = 30
-    url: str = "https://api.openai.com/v1/embeddings"
+    endpoint: str = "https://api.openai.com/v1/embeddings"
     batch_size: int = 64
     progress_bar: bool = False
     model: str = EmbeddingModels.Ada.value
@@ -71,15 +71,6 @@ class DataStoreConfig(BaseModel):
     host: str
     port: int
     password: str
-
-
-class ChatGPTResponse(BaseModel):
-    conversation_id: str
-    message: str
-    chat_gpt_answer: str
-
-
-class RedisDataStoreConfig(DataStoreConfig):
     index_type: str = RedisIndexType.HNSW.value
     vector_field_name: str = "embedding"
     vector_dimensions: int = 1024
@@ -89,8 +80,11 @@ class RedisDataStoreConfig(DataStoreConfig):
     EF: int = 200
 
 
-class Memory(BaseModel):
-    """
-    A memory dataclass.
-    """
+class ChatGPTResponse(BaseModel):
     conversation_id: str
+    message: str
+    chat_gpt_answer: str
+
+
+class RedisDataStoreConfig(DataStoreConfig):
+    pass

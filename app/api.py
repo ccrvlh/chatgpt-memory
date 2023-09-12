@@ -13,7 +13,20 @@ from app.chatgpt import ChatGPTClient
 from app.chatgpt import ChatGPTResponse
 from app.embeddings import EmbeddingClient
 from app.embeddings import EmbeddingConfig
-from app.manager import MemoryManager
+from app.store import MemoryManager
+
+
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY is not set")
+
+if not REDIS_HOST:
+    raise ValueError("REDIS_HOST is not set")
+
+if not REDIS_PORT:
+    raise ValueError("REDIS_PORT is not set")
+
+if not REDIS_PASSWORD:
+    raise ValueError("REDIS_PASSWORD is not set")
 
 
 # Instantiate an EmbeddingConfig object with the OpenAI API key
@@ -38,7 +51,7 @@ memory_manager = MemoryManager(datastore=redis_datastore, embed_client=embed_cli
 chat_gpt_config = ChatGPTConfig(api_key=OPENAI_API_KEY, verbose=False)
 
 # Instantiate a ChatGPTClient object with the ChatGPTConfig object and MemoryManager object
-chat_gpt_client = ChatGPTClient(config=chat_gpt_config, memory_manager=memory_manager)
+chat_gpt_client = ChatGPTClient(config=chat_gpt_config, store=memory_manager)
 
 
 class MessagePayload(BaseModel):
@@ -49,7 +62,7 @@ class MessagePayload(BaseModel):
 app = FastAPI()
 
 
-@app.post("/converse/")
+@app.post("/converse")
 async def converse(message_payload: MessagePayload) -> ChatGPTResponse:
     response = chat_gpt_client.converse(**message_payload.dict())
     return response

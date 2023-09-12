@@ -13,7 +13,7 @@ from app.embeddings import EmbeddingClient
 from app.embeddings import EmbeddingConfig
 from app.chatgpt import ChatGPTClient
 from app.chatgpt import ChatGPTConfig
-from app.manager import MemoryManager
+from app.store import MemoryManager
 
 # Instantiate an EmbeddingConfig object with the OpenAI API key
 embedding_config = EmbeddingConfig(api_key=OPENAI_API_KEY)
@@ -38,7 +38,7 @@ memory_manager = MemoryManager(datastore=redis_datastore, embed_client=embed_cli
 chat_gpt_config = ChatGPTConfig(api_key=OPENAI_API_KEY, verbose=False)
 
 # Instantiate a ChatGPTClient object with the ChatGPTConfig object and MemoryManager object
-chat_gpt_client = ChatGPTClient(config=chat_gpt_config, memory_manager=memory_manager)
+chat_gpt_client = ChatGPTClient(config=chat_gpt_config, store=memory_manager)
 
 
 # Initialize conversation_id to None

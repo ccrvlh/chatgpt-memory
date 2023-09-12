@@ -4,11 +4,10 @@ import requests
 import time
 
 from random import random
-from typing import Any
-from typing import Dict
+from typing import Any, Optional
 from typing import Tuple
 from typing import Union
-from transformers import GPT2TokenizerFast
+from transformers import GPT2TokenizerFast  # type: ignore[import]
 
 from app.config import OPENAI_BACKOFF
 from app.config import OPENAI_MAX_RETRIES
@@ -20,7 +19,7 @@ from app.errors import OpenAIRateLimitError
 logger = logging.getLogger(__name__)
 
 
-def load_openai_tokenizer(tokenizer_name: str, use_tiktoken: bool) -> Any:
+def load_tokenizer(tokenizer_name: str, use_tiktoken: bool) -> Any:
     """
     Load either the tokenizer from tiktoken (if the library is available) or
     fallback to the GPT2TokenizerFast from the transformers library.
@@ -52,7 +51,7 @@ def load_openai_tokenizer(tokenizer_name: str, use_tiktoken: bool) -> Any:
             )
     else:
         logger.warning(
-            "OpenAI tiktoken module is not available for Python < 3.8,Linux ARM64 and "
+            "OpenAI tiktoken module is not available for Python < 3.8, Linux ARM64 and "
             "AARCH64. Falling back to GPT2TokenizerFast."
         )
 
@@ -61,7 +60,7 @@ def load_openai_tokenizer(tokenizer_name: str, use_tiktoken: bool) -> Any:
     return tokenizer
 
 
-def count_openai_tokens(text: str, tokenizer: Any, use_tiktoken: bool) -> int:
+def count_tokens(text: str, tokenizer: Any, use_tiktoken: bool) -> int:
     """
     Count the number of tokens in `text` based on the provided OpenAI `tokenizer`.
 
@@ -73,11 +72,10 @@ def count_openai_tokens(text: str, tokenizer: Any, use_tiktoken: bool) -> int:
     Returns:
         int: Number of tokens in the text.
     """
-
+    tokens = len(tokenizer.tokenize(text))
     if use_tiktoken:
-        return len(tokenizer.encode(text))
-    else:
-        return len(tokenizer.tokenize(text))
+        tokens = len(tokenizer.encode(text))
+    return tokens
 
 
 def get_prompt(message: str, history: str) -> str:
@@ -112,16 +110,18 @@ def get_prompt(message: str, history: str) -> str:
     return prompt
 
 
-def retry_with_exponential_backoff(
-    backoff_in_seconds: float = 1,
-    max_retries: int = 10,
-    errors: tuple = (OpenAIRateLimitError,),
+def retry(
+    backoff_in_seconds: float = OPENAI_BACKOFF,
+    max_retries: int = OPENAI_MAX_RETRIES,
+    errors: tuple = (OpenAIRateLimitError, OpenAIError),
 ):
     """
     Decorator to retry a function with exponential backoff.
-    :param backoff_in_seconds: The initial backoff in seconds.
-    :param max_retries: The maximum number of retries.
-    :param errors: The errors to catch retry on.
+
+    Args:
+        backoff_in_seconds: The initial backoff in seconds.
+        max_retries: The maximum number of retries.
+        errors: The errors to catch retry on.
     """
 
     def decorator(function):
@@ -162,20 +162,17 @@ def retry_with_exponential_backoff(
     return decorator
 
 
-@retry_with_exponential_backoff(
-    backoff_in_seconds=OPENAI_BACKOFF,
-    max_retries=OPENAI_MAX_RETRIES,
-    errors=(OpenAIRateLimitError, OpenAIError),
-)
+@retry(backoff_in_seconds=15)
 def openai_request(
     url: str,
-    headers: Dict,
-    payload: Dict,
+    api_key: str,
+    payload: dict,
+    headers: Optional[dict] = None,
     timeout: Union[float, Tuple[float, float]] = OPENAI_TIMEOUT,
-) -> Dict:
+) -> dict:
     """
     Make a request to the OpenAI API given a `url`, `headers`, `payload`, and
-    `timeout`.
+    `timeout`. If request is unsucessful and `status_code = 429` raise rate limiting error else the OpenAIError.
 
     Args:
         url (str): The URL of the OpenAI API.
@@ -190,12 +187,13 @@ def openai_request(
     Returns:
         Dict: OpenAI Embedding API response.
     """
-
-    response = requests.request("POST", url, headers=headers, data=json.dumps(payload), timeout=timeout)
+    if not headers:
+        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
+    response = requests.request(
+        "POST", url, headers=headers, data=json.dumps(payload), timeout=timeout
+    )
     res = json.loads(response.text)
 
-    # if request is unsucessful and `status_code = 429` then,
-    # raise rate limiting error else the OpenAIError
     if response.status_code != 200:
         openai_error: OpenAIError
         if response.status_code == 429:

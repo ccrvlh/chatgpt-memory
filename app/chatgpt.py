@@ -6,7 +6,7 @@ from langchain import LLMChain
 from langchain import OpenAI
 from langchain import PromptTemplate
 
-from app.manager import MemoryManager
+from app.store import MemoryManager
 from app.utils import get_prompt
 from app.config import ChatGPTConfig
 from app.config import ChatGPTResponse
@@ -15,28 +15,30 @@ from app.config import ChatGPTResponse
 logger = logging.getLogger(__name__)
 
 
-class ChatGPTClient():
+class ChatGPTClient:
     """
     ChatGPT client allows to interact with the ChatGPT model alonside having infinite contextual and adaptive memory.
 
     """
 
-    def __init__(self, config: ChatGPTConfig, memory_manager: MemoryManager):
+    def __init__(self, config: ChatGPTConfig, store: MemoryManager):
         self._api_key = config.api_key
         self._time_out = config.time_out
         prompt = PromptTemplate(input_variables=["prompt"], template="{prompt}")
-        self.chatgpt_chain = LLMChain(
-            llm=OpenAI(
-                temperature=config.temperature,
-                openai_api_key=self.api_key,
-                model_name=config.model_name,
-                max_retries=config.max_retries,
-                max_tokens=config.max_tokens,
-            ),
+        openai_client = OpenAI(
+            temperature=config.temperature,
+            openai_api_key=self.api_key,
+            model_name=config.model_name,
+            max_retries=config.max_retries,
+            max_tokens=config.max_tokens,
+            client=None,
+        )
+        self.chain = LLMChain(
+            llm=openai_client,
             prompt=prompt,
             verbose=config.verbose,
         )
-        self.memory_manager = memory_manager
+        self.store = store
 
     @property
     def api_key(self):
@@ -63,16 +65,27 @@ class ChatGPTClient():
 
         history = ""
         try:
-            past_messages = self.memory_manager.get_messages(conversation_id=conversation_id, query=message)
-            history = "\n".join([past_message.text for past_message in past_messages if getattr(past_message, "text")])
+            past_messages = self.store.get_messages(conversation_id=conversation_id, query=message)
+            history = "\n".join(
+                [
+                    past_message.text
+                    for past_message in past_messages
+                    if getattr(past_message, "text")
+                ]
+            )
         except ValueError as history_not_found_error:
             logger.warning(
                 f"No previous chat history found for conversation_id: {conversation_id}.\nDetails: {history_not_found_error}"
             )
         prompt = get_prompt(message=message, history=history)
-        chat_gpt_answer = self.chatgpt_chain.predict(prompt=prompt)
+        chat_gpt_answer = self.chain.predict(prompt=prompt)
 
         if len(message.strip()) and len(chat_gpt_answer.strip()):
-            self.memory_manager.add_message(conversation_id=conversation_id, human=message, assistant=chat_gpt_answer)
+            self.store.add_message(
+                conversation_id=conversation_id, human=message, assistant=chat_gpt_answer
+            )
 
-        return ChatGPTResponse(message=message, chat_gpt_answer=chat_gpt_answer, conversation_id=conversation_id)
+        response = ChatGPTResponse(
+            message=message, chat_gpt_answer=chat_gpt_answer, conversation_id=conversation_id
+        )
+        return response

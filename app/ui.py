@@ -1,16 +1,18 @@
 """
 Adapted from https://github.com/avrabyt/MemoryBot
 """
-
 import requests
-
-# Import necessary libraries
 import streamlit as st
 
-from app.config import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
+from app.config import OPENAI_API_KEY
+from app.config import REDIS_HOST
+from app.config import REDIS_PASSWORD
+from app.config import REDIS_PORT
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="🧠MemoryBot🤖", layout="wide")
+
+
 # Initialize session states
 if "generated" not in st.session_state:
     st.session_state["generated"] = []
@@ -24,7 +26,6 @@ if "conversation_id" not in st.session_state:
     st.session_state["conversation_id"] = None
 
 
-# Define function to get user input
 def get_text():
     """
     Get the user input text.
@@ -46,21 +47,22 @@ def get_text():
 
 def send_text():
     user_input = st.session_state["input"]
-    if user_input:
-        # Use the ChatGPTClient object to generate a response
-        url = "http://localhost:8000/converse"
-        payload = {"message": user_input, "conversation_id": st.session_state.conversation_id}
+    if not user_input:
+        return
 
-        response = requests.post(url, json=payload).json()
-        # Update the conversation_id with the conversation_id from the response
-        if not st.session_state.conversation_id:
-            st.session_state.conversation_id = response["conversation_id"]
-        st.session_state.past.insert(0, user_input)
-        st.session_state.generated.insert(0, response["chat_gpt_answer"])
-        st.session_state["input"] = ""
+    url = "http://localhost:8000/converse"
+    payload = {"message": user_input, "conversation_id": st.session_state.conversation_id}
+    response = requests.post(url, json=payload).json()
+
+    # Update the conversation_id with the conversation_id from the response
+    if not st.session_state.get("conversation_id"):
+        st.session_state["conversation_id"] = response["conversation_id"]
+
+    st.session_state["past"].insert(0, user_input)
+    st.session_state["generated"].insert(0, response["chat_gpt_answer"])
+    st.session_state["input"] = ""
 
 
-# Define function to start a new chat
 def new_chat():
     """
     Clears session state and starts a new chat.
@@ -98,6 +100,7 @@ user_input = get_text()
 
 # Allow to download as well
 download_str = []
+
 # Display the conversation history using an expander, and allow the user to download it
 with st.expander("Conversation", expanded=True):
     for i in range(len(st.session_state["generated"]) - 1, -1, -1):

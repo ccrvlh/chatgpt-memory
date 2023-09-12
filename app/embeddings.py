@@ -3,38 +3,35 @@ import numpy as np
 
 from tqdm import tqdm
 from typing import Any
-from typing import Dict
-from typing import List
 from typing import Union
 
 from app.config import MAX_ALLOWED_SEQ_LEN_001
 from app.config import MAX_ALLOWED_SEQ_LEN_002
 from app.config import EmbeddingModels
 from app.config import EmbeddingConfig
-from app.utils import count_openai_tokens
-from app.utils import load_openai_tokenizer
+from app.utils import count_tokens
+from app.utils import load_tokenizer
 from app.utils import openai_request
 
 
 logger = logging.getLogger(__name__)
 
 
-class EmbeddingClient():
-
+class EmbeddingClient:
     def __init__(self, config: EmbeddingConfig):
         self._api_key = config.api_key
         self._time_out = config.time_out
-        self.openai_embedding_config = config
-        model_class: str = EmbeddingModels(self.openai_embedding_config.model).name
+        self.config = config
+        model_class: str = EmbeddingModels(self.config.model).name
 
         tokenizer = self._setup_encoding_models(
             model_class,
-            self.openai_embedding_config.model,
-            self.openai_embedding_config.max_seq_len,
+            self.config.model,
+            self.config.max_seq_len,
         )
-        self._tokenizer = load_openai_tokenizer(
+        self._tokenizer = load_tokenizer(
             tokenizer_name=tokenizer,
-            use_tiktoken=self.openai_embedding_config.use_tiktoken,
+            use_tiktoken=self.config.use_tiktoken,
         )
 
     @property
@@ -61,9 +58,9 @@ class EmbeddingClient():
             self.query_encoder_model = model_name
             self.doc_encoder_model = model_name
             self.max_seq_len = min(MAX_ALLOWED_SEQ_LEN_002, max_seq_len)
-            if self.openai_embedding_config.use_tiktoken:
+            if self.config.use_tiktoken:
                 try:
-                    from tiktoken.model import MODEL_TO_ENCODING
+                    from tiktoken.model import MODEL_TO_ENCODING  # type: ignore[attr-defined]
 
                     tokenizer_name = MODEL_TO_ENCODING.get(model_name, "cl100k_base")
                 except ImportError:
@@ -91,33 +88,36 @@ class EmbeddingClient():
         Returns:
             text (str): Trimmed text if exceeds the max token limit
         """
-        n_tokens = count_openai_tokens(text, self._tokenizer, self.openai_embedding_config.use_tiktoken)
+        n_tokens = count_tokens(text, self._tokenizer, self.config.use_tiktoken)
         if n_tokens <= self.max_seq_len:
             return text
 
         logger.warning(
-            "The prompt has been truncated from %s tokens to %s tokens to fit" "within the max token limit.",
+            "The prompt has been truncated from %s tokens to %s tokens to fit"
+            "within the max token limit.",
             "Reduce the length of the prompt to prevent it from being cut off.",
             n_tokens,
             self.max_seq_len,
         )
 
-        if self.openai_embedding_config.use_tiktoken:
+        if self.config.use_tiktoken:
             tokenized_payload = self._tokenizer.encode(text)
             decoded_string = self._tokenizer.decode(tokenized_payload[: self.max_seq_len])
         else:
             tokenized_payload = self._tokenizer.tokenize(text)
-            decoded_string = self._tokenizer.convert_tokens_to_string(tokenized_payload[: self.max_seq_len])
+            decoded_string = self._tokenizer.convert_tokens_to_string(
+                tokenized_payload[: self.max_seq_len]
+            )
 
         return decoded_string
 
-    def embed(self, model: str, text: List[str]) -> np.ndarray:
+    def embed(self, model: str, text: list[str]) -> np.ndarray:
         """
         Embeds the batch of texts using the specified LLM.
 
         Args:
             model (str): LLM model name for embeddings.
-            text (List[str]): List of documents to be embedded.
+            text (list[str]): list of documents to be embedded.
 
         Raises:
             ValueError: When the OpenAI API key is missing.
@@ -127,45 +127,40 @@ class EmbeddingClient():
         """
         if self.api_key is None:
             raise ValueError(
-                "OpenAI API key is not set. You can set it via the " "`api_key` parameter of the `LLMClient`."
+                "OpenAI API key is not set. You can set it via the "
+                "`api_key` parameter of the `LLMClient`."
             )
 
-        generated_embeddings: List[Any] = []
-
-        headers: Dict[str, str] = {"Content-Type": "application/json"}
-        payload: Dict[str, Union[List[str], str]] = {"model": model, "input": text}
-        headers["Authorization"] = f"Bearer {self.api_key}"
-
+        generated_embeddings: list[Any] = []
+        payload: dict[str, Union[list[str], str]] = {"model": model, "input": text}
         res = openai_request(
-            url=self.openai_embedding_config.url,
-            headers=headers,
+            url=self.config.endpoint,
+            api_key=self.api_key,
             payload=payload,
             timeout=self.time_out,
         )
-
-        unordered_embeddings = [(ans["index"], ans["embedding"]) for ans in res["data"]]
+        data = res.get("data", [])
+        unordered_embeddings = [(ans["index"], ans["embedding"]) for ans in data]
         ordered_embeddings = sorted(unordered_embeddings, key=lambda x: x[0])
-
         generated_embeddings = [emb[1] for emb in ordered_embeddings]
-
         return np.array(generated_embeddings)
 
-    def embed_batch(self, model: str, text: List[str]) -> np.ndarray:
+    def embed_batch(self, model: str, text: list[str]) -> np.ndarray:
         all_embeddings = []
         for i in tqdm(
-            range(0, len(text), self.openai_embedding_config.batch_size),
-            disable=not self.openai_embedding_config.progress_bar,
+            range(0, len(text), self.config.batch_size),
+            disable=not self.config.progress_bar,
             desc="Calculating embeddings",
         ):
-            batch = text[i : i + self.openai_embedding_config.batch_size]
+            batch = text[i : i + self.config.batch_size]
             batch_limited = [self._ensure_text_limit(content) for content in batch]
             generated_embeddings = self.embed(model, batch_limited)
             all_embeddings.append(generated_embeddings)
 
         return np.concatenate(all_embeddings)
 
-    def embed_queries(self, queries: List[str]) -> np.ndarray:
+    def embed_queries(self, queries: list[str]) -> np.ndarray:
         return self.embed_batch(self.query_encoder_model, queries)
 
-    def embed_documents(self, docs: List[Dict]) -> np.ndarray:
+    def embed_documents(self, docs: list[dict]) -> np.ndarray:
         return self.embed_batch(self.doc_encoder_model, [d["text"] for d in docs])
