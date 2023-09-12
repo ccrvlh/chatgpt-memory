@@ -1,9 +1,9 @@
 import numpy as np
 
 from app.redis import RedisDataStore
-from app.environment import OPENAI_API_KEY
-from app.llm_client.openai.embedding.config import EmbeddingConfig
-from app.llm_client.openai.embedding.embedding_client import EmbeddingClient
+from app.config import OPENAI_API_KEY
+from app.embeddings import EmbeddingConfig
+from app.embeddings import EmbeddingClient
 
 SAMPLE_QUERIES = ["Where is Berlin?"]
 SAMPLE_DOCUMENTS = [

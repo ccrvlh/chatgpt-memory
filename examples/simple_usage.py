@@ -7,9 +7,11 @@ from app.datastore import RedisDataStore, RedisDataStoreConfig
 
 ## set the following ENVIRONMENT Variables before running this script
 # Import necessary modules
-from app.environment import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
-from app.client import ChatGPTClient, ChatGPTConfig, EmbeddingClient, EmbeddingConfig
-from app.memory import MemoryManager
+from app.config import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
+from app.embeddings import EmbeddingClient
+from app.embeddings import EmbeddingConfig
+from app.chatgpt import ChatGPTClient, ChatGPTConfig
+from app.manager import MemoryManager
 
 # Instantiate an EmbeddingConfig object with the OpenAI API key
 embedding_config = EmbeddingConfig(api_key=OPENAI_API_KEY)

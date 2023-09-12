@@ -1,10 +1,10 @@
 import pytest
 
-from app.datastore.config import RedisDataStoreConfig
+from app.config import RedisDataStoreConfig
 from app.redis import RedisDataStore
-from app.environment import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
-from app.llm_client.openai.embedding.config import EmbeddingConfig
-from app.llm_client.openai.embedding.embedding_client import EmbeddingClient
+from app.config import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
+from app.embeddings import EmbeddingConfig
+from app.embeddings import EmbeddingClient
 
 
 @pytest.fixture(scope="session")
