@@ -17,9 +17,8 @@ from app.manager import MemoryManager
 
 
 # Instantiate an EmbeddingConfig object with the OpenAI API key
-embedding_config = EmbeddingConfig(api_key=OPENAI_API_KEY)
-
 # Instantiate an EmbeddingClient object with the EmbeddingConfig object
+embedding_config = EmbeddingConfig(api_key=OPENAI_API_KEY)
 embed_client = EmbeddingClient(config=embedding_config)
 
 # Instantiate a RedisDataStoreConfig object with the Redis connection details
