@@ -1,13 +1,21 @@
 import logging
-from typing import Any, Dict, List, Union
-
 import numpy as np
-from tqdm import tqdm
 
-from chatgpt_memory.constants import MAX_ALLOWED_SEQ_LEN_001, MAX_ALLOWED_SEQ_LEN_002
-from chatgpt_memory.llm_client.llm_client import LLMClient
-from chatgpt_memory.llm_client.openai.embedding.config import EmbeddingConfig, EmbeddingModels
-from chatgpt_memory.utils.openai_utils import count_openai_tokens, load_openai_tokenizer, openai_request
+from tqdm import tqdm
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Union
+
+from app.constants import MAX_ALLOWED_SEQ_LEN_001
+from app.constants import MAX_ALLOWED_SEQ_LEN_002
+from app.client import LLMClient
+from app.config import EmbeddingModels
+from app.config import EmbeddingConfig
+from app.utils import count_openai_tokens
+from app.utils import load_openai_tokenizer
+from app.utils import openai_request
+
 
 logger = logging.getLogger(__name__)
 

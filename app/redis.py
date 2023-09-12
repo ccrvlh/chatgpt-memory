@@ -1,13 +1,18 @@
 import logging
-from typing import Any, Dict, List
+import redis
+
+from typing import Any
+from typing import Dict
+from typing import List
 from uuid import uuid4
 
-import redis
-from redis.commands.search.field import TagField, TextField, VectorField
+from redis.commands.search.field import TagField
+from redis.commands.search.field import TextField
+from redis.commands.search.field import VectorField
 from redis.commands.search.query import Query
 
-from chatgpt_memory.datastore.config import RedisDataStoreConfig
-from chatgpt_memory.datastore.datastore import DataStore
+from app.config import RedisDataStoreConfig
+from app.datastore import DataStore
 
 logger = logging.getLogger(__name__)
 

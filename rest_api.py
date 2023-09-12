@@ -3,10 +3,10 @@ from typing import Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from chatgpt_memory.datastore import RedisDataStore, RedisDataStoreConfig
-from chatgpt_memory.environment import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
-from chatgpt_memory.llm_client import ChatGPTClient, ChatGPTConfig, ChatGPTResponse, EmbeddingClient, EmbeddingConfig
-from chatgpt_memory.memory import MemoryManager
+from app.datastore import RedisDataStore, RedisDataStoreConfig
+from app.environment import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
+from app.client import ChatGPTClient, ChatGPTConfig, ChatGPTResponse, EmbeddingClient, EmbeddingConfig
+from app.memory import MemoryManager
 
 # Instantiate an EmbeddingConfig object with the OpenAI API key
 embedding_config = EmbeddingConfig(api_key=OPENAI_API_KEY)

@@ -1,14 +1,21 @@
 """Utils for using OpenAI API"""
 import json
 import logging
-from typing import Any, Dict, Tuple, Union
-
 import requests
+
+from typing import Union
+from typing import Tuple
+from typing import Dict
+from typing import Any
+
 from transformers import GPT2TokenizerFast
 
-from chatgpt_memory.environment import OPENAI_BACKOFF, OPENAI_MAX_RETRIES, OPENAI_TIMEOUT
-from chatgpt_memory.errors import OpenAIError, OpenAIRateLimitError
-from chatgpt_memory.utils.reflection import retry_with_exponential_backoff
+from app.environment import OPENAI_BACKOFF
+from app.environment import OPENAI_MAX_RETRIES
+from app.environment import OPENAI_TIMEOUT
+from app.errors import OpenAIError
+from app.errors import OpenAIRateLimitError
+from app.reflection import retry_with_exponential_backoff
 
 logger = logging.getLogger(__name__)
 

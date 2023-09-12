@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
-from chatgpt_memory.datastore.config import DataStoreConfig
+from app.datastore.config import DataStoreConfig
 
 
 class DataStore(ABC):

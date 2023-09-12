@@ -1,13 +1,16 @@
 import logging
 import uuid
 
-from langchain import LLMChain, OpenAI, PromptTemplate
+from langchain import LLMChain
+from langchain import OpenAI
+from langchain import PromptTemplate
 from pydantic import BaseModel
 
-from chatgpt_memory.llm_client.llm_client import LLMClient
-from chatgpt_memory.llm_client.openai.conversation.config import ChatGPTConfig
-from chatgpt_memory.memory.manager import MemoryManager
-from chatgpt_memory.utils.openai_utils import get_prompt
+from app.client import LLMClient
+from app.manager import MemoryManager
+from app.utils import get_prompt
+from app.config import ChatGPTConfig
+
 
 logger = logging.getLogger(__name__)
 

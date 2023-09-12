@@ -1,11 +1,13 @@
-from typing import Any, Dict, List
-
 import numpy as np
 
-from chatgpt_memory.datastore.redis import RedisDataStore
-from chatgpt_memory.llm_client.openai.embedding.embedding_client import EmbeddingClient
+from typing import Any
+from typing import Dict
+from typing import List
 
-from .memory import Memory
+from app.redis import RedisDataStore
+from app.embeddings import EmbeddingClient
+
+from app.memory import Memory
 
 
 class MemoryManager:

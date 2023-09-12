@@ -1,10 +1,14 @@
 import inspect
 import logging
 import time
-from random import random
-from typing import Any, Callable, Dict, Tuple
 
-from chatgpt_memory.errors import OpenAIRateLimitError
+from random import random
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Tuple
+
+from app.errors import OpenAIRateLimitError
 
 logger = logging.getLogger(__name__)
 

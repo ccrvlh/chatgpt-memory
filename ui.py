@@ -7,7 +7,7 @@ import requests
 # Import necessary libraries
 import streamlit as st
 
-from chatgpt_memory.environment import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
+from app.environment import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="🧠MemoryBot🤖", layout="wide")

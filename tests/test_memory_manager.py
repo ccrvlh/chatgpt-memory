@@ -1,10 +1,10 @@
-from chatgpt_memory.datastore.config import RedisDataStoreConfig
-from chatgpt_memory.datastore.redis import RedisDataStore
-from chatgpt_memory.environment import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
-from chatgpt_memory.llm_client.openai.embedding.config import EmbeddingConfig
-from chatgpt_memory.llm_client.openai.embedding.embedding_client import EmbeddingClient
-from chatgpt_memory.memory.manager import MemoryManager
-from chatgpt_memory.memory.memory import Memory
+from app.datastore.config import RedisDataStoreConfig
+from app.redis import RedisDataStore
+from app.environment import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
+from app.llm_client.openai.embedding.config import EmbeddingConfig
+from app.llm_client.openai.embedding.embedding_client import EmbeddingClient
+from app.manager import MemoryManager
+from app.memory.memory import Memory
 
 
 class TestMemoryManager:

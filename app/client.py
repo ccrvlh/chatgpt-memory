@@ -1,6 +1,6 @@
 from abc import ABC
 
-from chatgpt_memory.llm_client.config import LLMClientConfig
+from app.llm_client.config import LLMClientConfig
 
 
 class LLMClient(ABC):
