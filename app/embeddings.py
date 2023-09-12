@@ -7,9 +7,8 @@ from typing import Dict
 from typing import List
 from typing import Union
 
-from app.constants import MAX_ALLOWED_SEQ_LEN_001
-from app.constants import MAX_ALLOWED_SEQ_LEN_002
-from app.client import LLMClient
+from app.config import MAX_ALLOWED_SEQ_LEN_001
+from app.config import MAX_ALLOWED_SEQ_LEN_002
 from app.config import EmbeddingModels
 from app.config import EmbeddingConfig
 from app.utils import count_openai_tokens
