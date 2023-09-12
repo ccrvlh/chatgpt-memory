@@ -4,7 +4,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 
-from app.config import DataStoreConfig
+from app.schemas import DataStoreConfig
 
 
 class DataStore(ABC):

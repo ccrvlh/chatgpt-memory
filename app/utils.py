@@ -12,8 +12,8 @@ from transformers import GPT2TokenizerFast  # type: ignore[import]
 from app.config import OPENAI_BACKOFF
 from app.config import OPENAI_MAX_RETRIES
 from app.config import OPENAI_TIMEOUT
-from app.errors import OpenAIError
-from app.errors import OpenAIRateLimitError
+from app.exceptions import OpenAIError
+from app.exceptions import OpenAIRateLimitError
 
 
 logger = logging.getLogger(__name__)

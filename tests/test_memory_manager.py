@@ -1,4 +1,4 @@
-from app.config import RedisDataStoreConfig
+from app.schemas import RedisDataStoreConfig
 from app.redis import RedisDataStore
 from app.config import OPENAI_API_KEY, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 from app.embeddings import EmbeddingConfig

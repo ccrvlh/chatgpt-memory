@@ -10,7 +10,7 @@ from redis.commands.search.field import TagField  # type: ignore[import]
 from redis.commands.search.query import Query  # type: ignore[import]
 
 
-from app.config import RedisDataStoreConfig
+from app.schemas import RedisDataStoreConfig
 from app.interfaces import DataStore
 
 logger = logging.getLogger(__name__)

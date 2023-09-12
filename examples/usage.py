@@ -4,7 +4,7 @@ This script describes a simple usage of the library.
 You can see a breakdown of the individual steps in the README.md file.
 """
 from app.redis import RedisDataStore
-from app.config import RedisDataStoreConfig
+from app.schemas import RedisDataStoreConfig
 
 ## set the following ENVIRONMENT Variables before running this script
 # Import necessary modules

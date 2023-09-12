@@ -7,8 +7,8 @@ from typing import Union
 
 from app.config import MAX_ALLOWED_SEQ_LEN_001
 from app.config import MAX_ALLOWED_SEQ_LEN_002
-from app.config import EmbeddingModels
-from app.config import EmbeddingConfig
+from app.schemas import EmbeddingModels
+from app.schemas import EmbeddingConfig
 from app.utils import count_tokens
 from app.utils import load_tokenizer
 from app.utils import openai_request

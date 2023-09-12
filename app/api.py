@@ -2,8 +2,8 @@ from typing import Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from app.config import ChatGPTConfig
-from app.config import RedisDataStoreConfig
+from app.schemas import ChatGPTConfig
+from app.schemas import RedisDataStoreConfig
 from app.redis import RedisDataStore
 from app.config import OPENAI_API_KEY
 from app.config import REDIS_HOST

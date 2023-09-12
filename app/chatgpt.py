@@ -8,8 +8,8 @@ from langchain import PromptTemplate
 
 from app.store import MemoryManager
 from app.utils import get_prompt
-from app.config import ChatGPTConfig
-from app.config import ChatGPTResponse
+from app.schemas import ChatGPTConfig
+from app.schemas import ChatGPTResponse
 
 
 logger = logging.getLogger(__name__)

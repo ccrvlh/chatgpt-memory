@@ -29,10 +29,14 @@ def test_redis_datastore(redis_datastore: RedisDataStore):
 
     query_embeddings: np.ndarray = openai_embedding_client.embed_queries(SAMPLE_QUERIES)
     query_vector = query_embeddings[0].astype(np.float32).tobytes()
-    search_results = redis_datastore.search_documents(query_vector=query_vector, conversation_id="1", topk=1)
+    search_results = redis_datastore.search_documents(
+        query_vector=query_vector, conversation_id="1", topk=1
+    )
     assert len(search_results), "No documents returned, expected 1 document."
 
-    assert search_results[0].text == "Berlin is located in Germany.", "Incorrect document returned as search result."
+    assert (
+        search_results[0].text == "Berlin is located in Germany."
+    ), "Incorrect document returned as search result."
 
     redis_datastore.delete_documents(conversation_id="1")
     assert redis_datastore.get_all_conversation_ids() == [
