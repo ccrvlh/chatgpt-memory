@@ -1,4 +1,3 @@
-"""Utils for using OpenAI API"""
 import json
 import logging
 import requests

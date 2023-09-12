@@ -1,5 +1,3 @@
-"""Custom Errors for ChatGptMemory"""
-
 from typing import Optional
 
 
