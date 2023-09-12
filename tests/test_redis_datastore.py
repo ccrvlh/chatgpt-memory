@@ -5,6 +5,7 @@ from app.config import OPENAI_API_KEY
 from app.embeddings import EmbeddingConfig
 from app.embeddings import EmbeddingClient
 
+
 SAMPLE_QUERIES = ["Where is Berlin?"]
 SAMPLE_DOCUMENTS = [
     {"text": "Berlin is located in Germany.", "conversation_id": "1"},

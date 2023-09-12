@@ -1,4 +1,4 @@
-from app.llm_client.openai.embedding.embedding_client import EmbeddingClient
+from app.embeddings import EmbeddingClient
 
 SAMPLE_QUERIES = ["Where is Berlin?"]
 SAMPLE_DOCUMENTS = [{"text": "Berlin is located in Germany."}]

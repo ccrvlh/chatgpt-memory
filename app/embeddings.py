@@ -20,10 +20,11 @@ from app.utils import openai_request
 logger = logging.getLogger(__name__)
 
 
-class EmbeddingClient(LLMClient):
-    def __init__(self, config: EmbeddingConfig):
-        super().__init__(config=config)
+class EmbeddingClient():
 
+    def __init__(self, config: EmbeddingConfig):
+        self._api_key = config.api_key
+        self._time_out = config.time_out
         self.openai_embedding_config = config
         model_class: str = EmbeddingModels(self.openai_embedding_config.model).name
 
@@ -36,6 +37,14 @@ class EmbeddingClient(LLMClient):
             tokenizer_name=tokenizer,
             use_tiktoken=self.openai_embedding_config.use_tiktoken,
         )
+
+    @property
+    def api_key(self):
+        return self._api_key
+
+    @property
+    def time_out(self):
+        return self._time_out
 
     def _setup_encoding_models(self, model_class: str, model_name: str, max_seq_len: int):
         """

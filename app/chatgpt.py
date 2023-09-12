@@ -1,34 +1,29 @@
 import logging
 import uuid
 
+from typing import Optional
 from langchain import LLMChain
 from langchain import OpenAI
 from langchain import PromptTemplate
-from pydantic import BaseModel
 
-from app.client import LLMClient
 from app.manager import MemoryManager
 from app.utils import get_prompt
 from app.config import ChatGPTConfig
+from app.config import ChatGPTResponse
 
 
 logger = logging.getLogger(__name__)
 
 
-class ChatGPTResponse(BaseModel):
-    conversation_id: str
-    message: str
-    chat_gpt_answer: str
-
-
-class ChatGPTClient(LLMClient):
+class ChatGPTClient():
     """
     ChatGPT client allows to interact with the ChatGPT model alonside having infinite contextual and adaptive memory.
 
     """
 
     def __init__(self, config: ChatGPTConfig, memory_manager: MemoryManager):
-        super().__init__(config=config)
+        self._api_key = config.api_key
+        self._time_out = config.time_out
         prompt = PromptTemplate(input_variables=["prompt"], template="{prompt}")
         self.chatgpt_chain = LLMChain(
             llm=OpenAI(
@@ -43,7 +38,15 @@ class ChatGPTClient(LLMClient):
         )
         self.memory_manager = memory_manager
 
-    def converse(self, message: str, conversation_id: str = None) -> ChatGPTResponse:
+    @property
+    def api_key(self):
+        return self._api_key
+
+    @property
+    def time_out(self):
+        return self._time_out
+
+    def converse(self, message: str, conversation_id: Optional[str] = None) -> ChatGPTResponse:
         """
         Allows user to chat with user by leveraging the infinite contextual memor for fetching and
         adding historical messages to the prompt to the ChatGPT model.
