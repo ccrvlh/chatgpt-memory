@@ -7,7 +7,7 @@ from typing import List
 from app.redis import RedisDataStore
 from app.embeddings import EmbeddingClient
 
-from app.memory import Memory
+from app.config import Memory
 
 
 class MemoryManager:

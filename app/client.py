@@ -1,6 +1,6 @@
 from abc import ABC
 
-from app.llm_client.config import LLMClientConfig
+from app.config import LLMClientConfig
 
 
 class LLMClient(ABC):

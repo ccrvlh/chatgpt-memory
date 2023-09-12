@@ -7,15 +7,15 @@ from typing import Union
 from typing import Tuple
 from typing import Dict
 from typing import Any
-
 from transformers import GPT2TokenizerFast
 
-from app.environment import OPENAI_BACKOFF
-from app.environment import OPENAI_MAX_RETRIES
-from app.environment import OPENAI_TIMEOUT
+from app.config import OPENAI_BACKOFF
+from app.config import OPENAI_MAX_RETRIES
+from app.config import OPENAI_TIMEOUT
 from app.errors import OpenAIError
 from app.errors import OpenAIRateLimitError
 from app.reflection import retry_with_exponential_backoff
+
 
 logger = logging.getLogger(__name__)
 

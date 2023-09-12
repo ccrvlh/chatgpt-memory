@@ -1,7 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from abc import ABC
+from abc import abstractmethod
+from typing import Any
+from typing import Dict
+from typing import List
 
-from app.datastore.config import DataStoreConfig
+from app.config import DataStoreConfig
 
 
 class DataStore(ABC):
