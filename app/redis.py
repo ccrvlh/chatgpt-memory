@@ -1,13 +1,14 @@
 import logging
-import redis
+import redis  # type: ignore[import]
 
 from typing import Any
 from uuid import uuid4
 
-from redis.commands.search.field import TagField
-from redis.commands.search.field import TextField
-from redis.commands.search.field import VectorField
-from redis.commands.search.query import Query
+from redis.commands.search.field import TextField  # type: ignore[import]
+from redis.commands.search.field import VectorField  # type: ignore[import]
+from redis.commands.search.field import TagField  # type: ignore[import]
+from redis.commands.search.query import Query  # type: ignore[import]
+
 
 from app.config import RedisDataStoreConfig
 from app.interfaces import DataStore

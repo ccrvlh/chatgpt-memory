@@ -15,6 +15,20 @@ from app.chatgpt import ChatGPTClient
 from app.chatgpt import ChatGPTConfig
 from app.store import MemoryManager
 
+
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY is not set")
+
+if not REDIS_HOST:
+    raise ValueError("REDIS_HOST is not set")
+
+if not REDIS_PORT:
+    raise ValueError("REDIS_PORT is not set")
+
+if not REDIS_PASSWORD:
+    raise ValueError("REDIS_PASSWORD is not set")
+
+
 # Instantiate an EmbeddingConfig object with the OpenAI API key
 embedding_config = EmbeddingConfig(api_key=OPENAI_API_KEY)
 
